@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XEINHACK - Digital Game Keys</title>
+<style>
+body { font-family:Roboto,sans-serif; margin:0; background:linear-gradient(135deg,#e0f7fa,#fff3e0); color:#111; }
+h1{text-align:center;margin:10px 0;color:#6a0dad;}
+.page-box{background:#f5f0ff;border:2px solid #6a0dad;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);padding:25px;margin:20px auto;max-width:750px;}
+.products{display:flex;flex-direction:column;gap:20px;}
+.product-card{border:2px solid #6a0dad;border-radius:12px;padding:20px;box-shadow:0 2px 5px rgba(0,0,0,0.1);display:flex;justify-content:space-between;align-items:center;font-size:18px;}
+.product-card button{padding:10px 15px;font-size:16px;border:none;background:#6a0dad;color:#fff;border-radius:5px;cursor:pointer;}
+.note{background:#fff3b0;padding:10px;border-radius:5px;margin-bottom:15px;text-align:center;font-weight:bold;}
+.grid-container{display:grid;grid-template-columns:1fr;gap:20px;}
+.grid-item{background:#e6ccff;border:2px solid #6a0dad;border-radius:12px;padding:20px;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
+.wallet-box{background:#e6ccff;border:2px solid #6a0dad;border-radius:12px;padding:20px;margin-bottom:15px;display:flex;flex-direction:column;gap:10px;}
+.wallet-content{display:flex;justify-content:space-between;align-items:center;}
+#walletAddress{font-size:14px;word-break:break-all;margin:0;color:#4b0082;}
+.wallet-box button{padding:8px 12px;border:none;background:#6a0dad;color:#fff;border-radius:6px;cursor:pointer;font-weight:bold;transition:0.2s;}
+.wallet-box button:hover{background:#4b0082;}
+#recentPurchase{position:fixed;bottom:10px;left:10px;background:#fff8c4;border:1px solid #ccc;border-radius:8px;padding:8px 12px;box-shadow:0 2px 5px rgba(0,0,0,0.2);font-size:14px;z-index:999;max-width:250px;}
+button{cursor:pointer;}
+#navLinks{display:none;flex-direction:column;gap:5px;margin:10px;}
+nav a{text-decoration:none;color:#111;font-weight:bold;}
+nav a:hover{color:#6a0dad;}
+.key-option{display:block;width:100%;margin:12px 0;padding:15px;font-size:18px;text-align:left;border:1px solid #6a0dad;border-radius:10px;background:#f5e6ff;cursor:pointer;transition:0.2s;}
+.key-option:hover{background:#d9b3ff;border-color:#6a0dad;}
+#paymentPrice{font-size:20px;font-weight:bold;text-align:center;color:#6a0dad;margin-top:10px;}
+#payment button{padding:12px 20px;font-size:16px;border:none;border-radius:8px;background:#6a0dad;color:#fff;cursor:pointer;transition:0.2s;}
+#payment button:hover{background:#4b0082;}
+</style>
+</head>
+<body>
+
+<h1>XEINHACK</h1>
+
+<nav>
+<button onclick="toggleNav()">☰ Menu</button>
+<div id="navLinks">
+  <a href="#" onclick="showPage('home')">Home</a>
+  <a href="#" onclick="showPage('track')">Track Order</a>
+  <a href="#" onclick="showAdminPanel()">Admin Login</a>
+</div>
+</nav>
+
+<!-- Home Page -->
+<div id="home" class="page-box">
+  <div class="note">NOTE: Please remember to screenshot your crypto payments and receipt.</div>
+  <div class="products">
+    <div class="product-card">
+      <span>Delta Keys</span>
+      <button onclick="buyProduct('Delta Keys')">Buy Now</button>
+    </div>
+    <div class="product-card">
+      <span>PUBG Keys</span>
+      <button onclick="buyProduct('PUBG Keys')">Buy Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Page -->
+<div id="checkout" class="page-box" style="display:none;">
+  <h2>Checkout</h2>
+  <div class="grid-container">
+    <div class="grid-item">
+      <p id="selected-product">You are buying: </p>
+      <input type="text" id="telegram" placeholder="Enter Telegram username">
+    </div>
+    <div class="grid-item" id="keyOptionsContainer">
+      <p>Select Key Duration:</p>
+      <div id="keyOptions"></div>
+      <p id="priceDisplay" style="font-weight:bold;color:#6a0dad;"></p>
+      <button onclick="proceedPayment()">Checkout</button>
+    </div>
+  </div>
+</div>
+
+<!-- Payment Page -->
+<div id="payment" class="page-box" style="display:none;">
+  <h2>Payment Details</h2>
+  <div class="grid-container">
+    <div class="grid-item wallet-box">
+      <div class="wallet-content">
+        <p id="walletAddress">TEwKbkNdXqvNUG951nYTCRF6UjLGBn7pqc</p>
+        <button onclick="copyWallet()">Copy</button>
+      </div>
+      <p>Network: TRC-20</p>
+      <p id="paymentPrice">$5</p>
+    </div>
+    <div class="grid-item">
+      <button onclick="markPaid()">I've Paid</button>
+    </div>
+  </div>
+</div>
+
+<div id="recentPurchase"></div>
+
+<script>
+// Admin password
+const adminPassword = "80256348$";
+
+function toggleNav() {
+  const nav = document.getElementById('navLinks');
+  nav.style.display = nav.style.display==='flex' ? 'none' : 'flex';
+}
+document.querySelectorAll('#navLinks a').forEach(link=>{
+  link.addEventListener('click',()=>{document.getElementById('navLinks').style.display='none';});
+});
+
+// Show page
+function showPage(page){
+  ['home','checkout','payment','receipt','adminPanel','track'].forEach(p=>{
+    if(document.getElementById(p)) document.getElementById(p).style.display='none';
+  });
+  if(document.getElementById(page)) document.getElementById(page).style.display='block';
+}
+
+// Admin panel login
+function showAdminPanel(){
+  const pass = prompt("Enter Admin Password:");
+  if(pass === adminPassword){
+    showPage('adminPanel');
+    renderAdmin();
+  } else {
+    alert("Incorrect password! Access denied.");
+  }
+}
+
+// Recent purchase ticker
+const fakeUsers = ['user123','player456','gamer789','proplayer','noobMaster'];
+const fakeProducts = ['Delta Keys','PUBG Keys'];
+function censorName(name){ return name.length<=2? name[0]+'*' : name[0] + '*'.repeat(name.length-2) + name[name.length-1]; }
+setInterval(()=>{
+  const user = fakeUsers[Math.floor(Math.random()*fakeUsers.length)];
+  const product = fakeProducts[Math.floor(Math.random()*fakeProducts.length)];
+  document.getElementById('recentPurchase').innerText = `${censorName(user)} bought ${product} a few minutes ago`;
+},7000);
+
+// Checkout logic
+let currentProduct='', currentDuration='', currentPrice=0;
+const prices = {
+  "Delta Keys":{"1 day":5,"3 day":8,"7 days":12,"14 days":17,"30 days":23},
+  "PUBG Keys":{"1 day":4,"3 day":7,"7 days":11,"30 days":22}
+};
+function buyProduct(product){
+  currentProduct=product; showPage('checkout');
+  document.getElementById('selected-product').innerText=`You are buying: ${product}`;
+  const container=document.getElementById('keyOptions');
+  container.innerHTML='';
+  Object.entries(prices[product]).forEach(([dur,price])=>{
+    const btn=document.createElement('button');
+    btn.className="key-option";
+    btn.innerText=`🔑 ${dur} - $${price}`;
+    btn.onclick=()=>{
+      currentDuration=dur; currentPrice=price;
+      document.getElementById('priceDisplay').innerText=`Price: $${price}`;
+      document.getElementById('paymentPrice').innerText=`$${price}`;
+    };
+    container.appendChild(btn);
+  });
+}
+
+// Payment
+function copyWallet(){ 
+  navigator.clipboard.writeText(document.getElementById('walletAddress').innerText); 
+  alert('Wallet copied!'); 
+}
+function proceedPayment(){ showPage('payment'); }
+
+// Orders storage
+let orders = JSON.parse(localStorage.getItem('orders')||'[]');
+function saveOrders(){ localStorage.setItem('orders',JSON.stringify(orders)); }
+<!-- Receipt Page -->
+<div id="receipt" class="page-box" style="display:none;">
+  <h2>Order Receipt</h2>
+  <div id="receiptBox"></div>
+</div>
+
+<!-- Admin Panel -->
+<div id="adminPanel" class="page-box" style="display:none;">
+  <h2>Admin Panel</h2>
+  <div id="adminStats"></div>
+  <table>
+    <thead>
+      <tr><th>Order ID</th><th>Product</th><th>Duration</th><th>Telegram</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="ordersTable"></tbody>
+  </table>
+</div>
+
+<!-- Track Order -->
+<div id="track" class="page-box" style="display:none;">
+  <h2>Track Your Order</h2>
+  <input type="text" id="trackId" placeholder="Enter Order ID">
+  <button onclick="checkOrder()">Track</button>
+  <div id="trackResult" style="margin-top:15px;"></div>
+</div>
+
+<script>
+// Mark as paid and generate receipt
+function markPaid(){
+  const username=document.getElementById('telegram').value.trim();
+  if(!username || !currentProduct || !currentDuration || !currentPrice){ 
+    alert("Please fill in all details!"); 
+    return; 
+  }
+  const order={
+    id:"ORD"+Math.floor(Math.random()*1000000),
+    product:currentProduct,
+    duration:currentDuration,
+    price:currentPrice,
+    telegram:username,
+    status:"Pending",
+    date:new Date().toLocaleString()
+  };
+  orders.push(order); 
+  saveOrders(); 
+  renderReceipt(order); 
+  showPage('receipt'); 
+  renderAdmin();
+}
+
+// Render receipt
+function renderReceipt(order){
+  const box=document.getElementById('receiptBox');
+  box.innerHTML=`<div class="grid-container">
+    <div class="grid-item">
+      <p><strong>Order ID:</strong> ${order.id}</p>
+      <p><strong>Product:</strong> ${order.product}</p>
+      <p><strong>Duration:</strong> ${order.duration}</p>
+      <p><strong>Telegram:</strong> <a href="https://t.me/${order.telegram}" target="_blank">${order.telegram}</a></p>
+      <p><strong>Price:</strong> $${order.price}</p>
+      <p><strong>Status:</strong> ${order.status}</p>
+      <p><strong>Date:</strong> ${order.date}</p>
+      <p>NOTE: Send BOTH screenshots of crypto payment and receipt to <a href="https://t.me/cocomelonqueen" target="_blank">@cocomelonqueen</a> on Telegram.</p>
+    </div>
+  </div>`;
+}
+
+// Track Order
+function checkOrder(){
+  const id=document.getElementById('trackId').value.trim();
+  const result=document.getElementById('trackResult');
+  const order=orders.find(o=>o.id===id);
+  if(order) result.innerHTML=`<p>Order ID: ${order.id}<br>Product: ${order.product}<br>Duration: ${order.duration}<br>Status: ${order.status}</p>`;
+  else result.innerHTML=`<p>No order found with ID ${id}</p>`;
+}
+
+// Admin panel render
+function renderAdmin(){
+  let totalProfit=0, pending=0, delivered=0, cancelled=0;
+  orders.forEach(o=>{
+    let profit=0;
+    if(o.product==="Delta Keys"){
+      const profits={"1 day":2,"3 day":3,"7 days":3,"14 days":4,"30 days":5};
+      profit=profits[o.duration]||0;
+    } else if(o.product==="PUBG Keys"){
+      const profits={"1 day":2,"3 day":3,"7 days":4,"30 days":7};
+      profit=profits[o.duration]||0;
+    }
+    totalProfit+=profit;
+    if(o.status==='Delivered') delivered++;
+    else if(o.status==='Pending') pending++;
+    else if(o.status==='Cancelled') cancelled++;
+  });
+
+  document.getElementById('adminStats').innerHTML=
+    `<p><strong>Total Orders:</strong> ${orders.length}</p>
+     <p><strong>Delivered:</strong> ${delivered} | <strong>Pending:</strong> ${pending} | <strong>Cancelled:</strong> ${cancelled}</p>
+     <p><strong>Total Profits:</strong> $${totalProfit}</p>`;
+
+  const tbody=document.getElementById('ordersTable'); 
+  tbody.innerHTML='';
+  orders.forEach((o,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${o.id}</td>
+                  <td>${o.product}</td>
+                  <td>${o.duration}</td>
+                  <td>${o.telegram}</td>
+                  <td>$${o.price}</td>
+                  <td>${o.status}</td>
+                  <td class="admin-actions">
+                    <button class="pending" onclick="changeStatus(${i},'Pending')">Pending</button>
+                    <button class="delivered" onclick="changeStatus(${i},'Delivered')">Delivered</button>
+                    <button class="cancelled" onclick="changeStatus(${i},'Cancelled')">Cancelled</button>
+                    <button class="delete" onclick="deleteOrder(${i})">Delete</button>
+                  </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// Admin actions
+function changeStatus(i,status){ orders[i].status=status; saveOrders(); renderAdmin(); }
+function deleteOrder(i){ if(confirm("Delete this order?")){ orders.splice(i,1); saveOrders(); renderAdmin(); } }
+
+// Initial admin render
+renderAdmin();
+</script>
+
+</body>
+</html>
